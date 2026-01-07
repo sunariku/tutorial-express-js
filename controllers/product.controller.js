@@ -1,27 +1,24 @@
 const db = require("../utils/db.util");
 const productSchema = require("../validations/product.schema");
+const Product = require("../models/Product");
 
-const getProduct = (req, res) => {
+const getProduct = async (req, res) => {
   try {
-    db.query(`SELECT * FROM products`, (err, data) => {
-      if (err) throw err;
+    const data = await Product.findAll();
 
-      res.status(200).json(data);
-    });
+    res.status(200).json(data);
   } catch (e) {
     res.status(500).json({ message: `Error ${e}` });
   }
 };
 
-const getProductById = (req, res) => {
+const getProductById = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
-    db.query(`SELECT * FROM products WHERE id = '${id}'`, (err, data) => {
-      if (err) throw err;
+    const data = await Product.findByPk(id);
 
-      res.status(200).json(data[0]);
-    });
+    res.status(200).json(data);
   } catch (e) {
     res.status(500).json({ message: `Error ${e}` });
   }
@@ -31,8 +28,8 @@ const createProduct = (req, res) => {
   try {
     const { error, value } = productSchema.validate(req.body);
 
-    if(error) {
-      return res.status(400).json({message: 'Validasi Error'});
+    if (error) {
+      return res.status(400).json({ message: "Validasi Error" });
     }
 
     const { name, price } = value;
