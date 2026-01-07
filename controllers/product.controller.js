@@ -1,4 +1,3 @@
-const db = require("../utils/db.util");
 const productSchema = require("../validations/product.schema");
 const Product = require("../models/Product");
 
@@ -24,7 +23,7 @@ const getProductById = async (req, res) => {
   }
 };
 
-const createProduct = (req, res) => {
+const createProduct = async (req, res) => {
   try {
     const { error, value } = productSchema.validate(req.body);
 
@@ -32,68 +31,43 @@ const createProduct = (req, res) => {
       return res.status(400).json({ message: "Validasi Error" });
     }
 
-    const { name, price } = value;
+    await Product.create(value);
 
-    db.query(
-      `
-      INSERT INTO products
-      (
-        name,
-        price
-      )
-      VALUES
-      (
-        '${name}',
-        ${price}
-      )`,
-      (err, data) => {
-        if (err) throw err;
-
-        res.status(200).json({ message: "Berhasil" });
-      }
-    );
+    res.status(200).json({ message: "Berhasil" });
   } catch (e) {
     res.status(500).json({ message: "Error" });
   }
 };
 
-const updateProduct = (req, res) => {
+const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, price } = req.body;
 
-    db.query(
-      `
-      UPDATE products
-      SET
-        name = '${name}',
-        price = ${price}
-      WHERE id = ${id}`,
-      (err, data) => {
-        if (err) throw err;
+    const { error, value } = productSchema.validate(req.body);
 
-        res.status(200).json({ message: "Berhasil" });
-      }
-    );
+    if (error) {
+      return res.status(400).json({ message: "Validasi Error" });
+    }
+
+    await Product.update(value, {
+      where: {
+        id,
+      },
+    });
+
+    res.status(200).json({ message: "Berhasil" });
   } catch (e) {
     res.status(500).json({ message: "Error" });
   }
 };
 
-const deleteProduct = (req, res) => {
+const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
 
-    db.query(
-      `
-      DELETE FROM products
-      WHERE id = ${id}`,
-      (err, data) => {
-        if (err) throw err;
+    await Product.destroy({ where: { id } });
 
-        res.status(200).json({ message: "Berhasil dihapus" });
-      }
-    );
+    res.status(200).json({ message: "Berhasil" });
   } catch (e) {
     res.status(500).json({ message: "Error" });
   }
