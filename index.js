@@ -1,4 +1,5 @@
 const express = require("express");
+const sequelize = require("./utils/db.util");
 
 const productRoute = require("./routes/product.route");
 
@@ -13,6 +14,13 @@ app.get("/", (req, res) => {
 
   res.status(200).json(pesan);
 });
+
+try {
+  sequelize.authenticate();
+  console.log("Connection has been established successfully.");
+} catch (error) {
+  console.error("Unable to connect to the database:", error);
+}
 
 app.listen(3000, () => {
   console.log("Server Berjalan");
